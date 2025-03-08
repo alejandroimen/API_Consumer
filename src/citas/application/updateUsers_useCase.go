@@ -5,15 +5,15 @@ import (
 	"github.com/alejandroimen/API_Consumer/src/citas/domain/repository"
 )
 
-type UpdateUcitas struct {
-	repo repository.ucitasRepository
+type UpdateCitas struct {
+	repo repository.CitasRepository
 }
 
-func NewUpdateUcitas(repo repository.ucitasRepository) *UpdateUcitas {
-	return &UpdateUcitas{repo: repo}
+func NewUpdateCitas(repo repository.CitasRepository) *UpdateCitas {
+	return &UpdateCitas{repo: repo}
 }
 
-func (us *UpdateUcitas) Run(id int, name string, email string, password string) error {
+func (us *UpdateCitas) Run(id int, name string, email string, password string) error {
 	ucitas, err := us.repo.FindByID(id)
 	if err != nil {
 		return fmt.Errorf("user no encontrado: %w", err)

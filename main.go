@@ -20,26 +20,13 @@ func main() {
 	defer db.Close()
 
 	// Repositorios
-	productRepository := productRepo.NewProductRepoMySQL(db)
 	citasRepository := citasRepo.NewCreatecitasRepoMySQL(db)
 
-	// Casos de uso para productos
-	createProduct := productApp.NewCreateProduct(productRepository)
-	getProducts := productApp.NewGetProducts(productRepository)
-	updateProduct := productApp.NewUpdateProduct(productRepository)
-	deleteProduct := productApp.NewDeleteProduct(productRepository)
-
 	// Casos de uso para citas
-	createcitas := citasApp.NewCreatecitas(citasRepository)
-	getcitass := citasApp.NewGetcitass(citasRepository)
+	createcitas := citasApp.NewCreateCitas(citasRepository)
+	getcitass := citasApp.NewGetcitas(citasRepository)
 	deletecitass := citasApp.NewDeletecitas(citasRepository)
 	updatecitass := citasApp.NewUpdatecitas(citasRepository)
-
-	// Controladores para productos
-	createProductController := productController.NewCreateProductController(createProduct)
-	getProductsController := productController.NewGetProductsController(getProducts)
-	updateProductController := productController.NewUpdateProductController(updateProduct)
-	deleteProductController := productController.NewDeleteProductController(deleteProduct)
 
 	// Controladores para citas
 	createcitasController := citasController.NewCreatecitasController(createcitas)
@@ -49,9 +36,6 @@ func main() {
 
 	// Configuración del enrutador de Gin
 	r := gin.Default()
-
-	// Configurar rutas de productos
-	productRoutes.SetupProductRoutes(r, createProductController, getProductsController, updateProductController, deleteProductController)
 
 	// Configurar rutas de citas
 	citasRoutes.SetupcitasRoutes(r, createcitasController, getcitasController, deletecitasController, updatecitasController)

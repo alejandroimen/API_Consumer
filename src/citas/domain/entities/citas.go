@@ -1,6 +1,6 @@
 package entities
 
-type citas struct {
+type Citas struct {
 	ID int
 	Name string
 	Email string

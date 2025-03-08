@@ -5,26 +5,26 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetupucitasRoutes(r *gin.Engine, createucitasController *controllers.CreateucitasController, getucitasController *controllers.GetucitassController, deleteucitasController *controllers.DeleteucitasController, updateucitasController *controllers.UpdateucitasController) {
+func SetupucitasRoutes(r *gin.Engine, createCitasController *controllers.CreateCitasController, getcitasController *controllers.GetCitasController, deletecitasController *controllers.DeletecitasController, updateucitasController *controllers.UpdateCitasController) {
 	// Rutas CRUD
-	r.POST("/ucitass", createucitasController.Handle)
-	r.GET("/ucitass", getucitasController.Handle)
-	r.DELETE("/ucitass/:id", deleteucitasController.Handle)
-	r.PUT("/ucitass/:id", updateucitasController.Handle)
+	r.POST("/citas", createCitasController.Handle)
+	r.GET("/citas", getcitasController.Handle)
+	r.DELETE("/citas/:id", deletecitasController.Handle)
+	r.PUT("/citas/:id", updateucitasController.Handle)
 
 	// Nuevas rutas para polling en POST
-	r.POST("/ucitass/poll/short", createucitasController.ShortPoll)
-	r.POST("/ucitass/poll/long", createucitasController.LongPoll)
+	r.POST("/citas/poll/short", createCitasController.ShortPoll)
+	r.POST("/citas/poll/long", createCitasController.LongPoll)
 
 	// Nuevas rutas para polling en DELETE
-	r.DELETE("/ucitass/poll/short", deleteucitasController.ShortPoll)
-	r.DELETE("/ucitass/poll/long", deleteucitasController.LongPoll)
+	r.DELETE("/citas/poll/short", deletecitasController.ShortPoll)
+	r.DELETE("/citas/poll/long", deletecitasController.LongPoll)
 
 	// Nuevas rutas para polling en PUT
-	r.PUT("/ucitass/poll/short", updateucitasController.ShortPoll)
-	r.PUT("/ucitass/poll/long", updateucitasController.LongPoll)
+	r.PUT("/citas/poll/short", updateucitasController.ShortPoll)
+	r.PUT("/citas/poll/long", updateucitasController.LongPoll)
 
 	// Nuevas rutas para polling en GET
-	r.GET("/ucitass/poll/short", getucitasController.ShortPoll)
-	r.GET("/ucitass/poll/long", getucitasController.LongPoll)
+	r.GET("/citas/poll/short", getcitasController.ShortPoll)
+	r.GET("/citas/poll/long", getcitasController.LongPoll)
 }

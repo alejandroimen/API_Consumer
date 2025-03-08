@@ -14,7 +14,7 @@ func NewCreatecitasRepoMySQL(db *sql.DB) *citasRepoMySQL {
 	return &citasRepoMySQL{db: db}
 }
 
-func (r *citasRepoMySQL) Save(citas entities.citas) error {
+func (r *citasRepoMySQL) Save(citas entities.Citas) error {
 	query := "INSERT INTO citas (name, email, password) VALUES (?, ?, ?)"
 	_, err := r.db.Exec(query, citas.Name, citas.Email, citas.Password)
 	if err != nil {
@@ -23,18 +23,18 @@ func (r *citasRepoMySQL) Save(citas entities.citas) error {
 	return nil
 }
 
-func (r *citasRepoMySQL) FindByID(id int) (*entities.citas, error) {
+func (r *citasRepoMySQL) FindByID(id int) (*entities.Citas, error) {
 	query := "SELECT id, name, email FROM citas WHERE id = ?"
 	row := r.db.QueryRow(query, id)
 
-	var citas entities.citas
+	var citas entities.Citas
 	if err := row.Scan(&citas.ID, &citas.Name, &citas.Email); err != nil {
 		return nil, fmt.Errorf("error buscando el citas: %w", err)
 	}
 	return &citas, nil
 }
 
-func (r *citasRepoMySQL) FindAll() ([]entities.citas, error) {
+func (r *citasRepoMySQL) FindAll() ([]entities.Citas, error) {
 	query := "SELECT id, name, email, password FROM citas"
 	rows, err := r.db.Query(query)
 	if err != nil {
@@ -42,18 +42,18 @@ func (r *citasRepoMySQL) FindAll() ([]entities.citas, error) {
 	}
 	defer rows.Close()
 
-	var citas []entities.citas
+	var citas []entities.Citas
 	for rows.Next() {
-		var citas entities.citas
-		if err := rows.Scan(&citas.ID, &citas.Name, &citas.Email, &citas.Password); err != nil {
+		var cita entities.Citas
+		if err := rows.Scan(&cita.ID, &cita.Name, &cita.Email, &cita.Password); err != nil {
 			return nil, err
 		}
-		citas = append(citas, citas)
+		citas = append(citas, cita)
 	}
 	return citas, nil
 }
 
-func (r *citasRepoMySQL) Update(citas entities.citas) error {
+func (r *citasRepoMySQL) Update(citas entities.Citas) error {
 	query := "UPDATE citas SET name = ?, email = ?, password = ? WHERE id = ?"
 	_, err := r.db.Exec(query, citas.Name, citas.Email, citas.Password, citas.ID)
 	if err != nil {

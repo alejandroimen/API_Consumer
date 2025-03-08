@@ -1,13 +1,13 @@
 package repository
 
-import ( 	
+import (
 	"github.com/alejandroimen/API_Consumer/src/citas/domain/entities"
 )
 
-type citasRepository interface {
-	Save(citas entities.citas) error
-	FindByID(id int) (*entities.citas, error)
-	FindAll() ([]entities.citas, error)
-	Update(citas entities.citas) error
+type CitasRepository interface {
+	Save(citas entities.Citas) error
+	FindByID(id int) (*entities.Citas, error)
+	FindAll() ([]entities.Citas, error)
+	Update(citas entities.Citas) error
 	Delete(id int) error
 }

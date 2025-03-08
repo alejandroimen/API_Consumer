@@ -10,10 +10,10 @@ import (
 )
 
 type DeletecitasController struct {
-	deletecitas *application.Deletecitas
+	deletecitas *application.DeleteCitas
 }
 
-func NewDeletecitasController(deletecitas *application.Deletecitas) *DeletecitasController {
+func NewDeletecitasController(deletecitas *application.DeleteCitas) *DeletecitasController {
 	return &DeletecitasController{deletecitas: deletecitas}
 }
 

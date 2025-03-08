@@ -9,16 +9,16 @@ import (
 
 // Contiene un campo de repo de tipo repository.user... siendo esto una inyección de dependencias
 type CreateCitas struct {
-	repo repository.citasRepository
+	repo repository.CitasRepository
 }
 
 // constructor de createCitas, que recibe un repositorio como parametro y lo asigna al campo repo. siendo configurable
-func NewCreateUser(repo repository.citasRepository) *CreateCitas {
+func NewCreateCita(repo repository.CitasRepository) *CreateCitas {
 	return &CreateCitas{repo: repo}
 }
 
 func (cu *CreateCitas) Run(name string, email string, password string) error {
-	user := entities.User{Name: name, Email: email, Password: password}
+	user := entities.Citas{Name: name, Email: email, Password: password}
 	if err := cu.repo.Save(user); err != nil {
 		return fmt.Errorf("error al guardar el user: %w", err)
 	}

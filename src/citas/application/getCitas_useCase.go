@@ -8,14 +8,14 @@ import (
 )
 
 type GetCitas struct {
-	repo repository.citasRepository
+	repo repository.CitasRepository
 }
 
-func NewGetCitas(repo repository.citasRepository) *GetCitas {
+func NewGetCitas(repo repository.CitasRepository) *GetCitas {
 	return &GetCitas{repo: repo}
 }
 
-func (gu *GetCitas) Run() ([]entities.ucitas, error) {
+func (gu *GetCitas) Run() ([]entities.Citas, error) {
 	ucitass, err := gu.repo.FindAll()
 	if err != nil {
 		return nil, err

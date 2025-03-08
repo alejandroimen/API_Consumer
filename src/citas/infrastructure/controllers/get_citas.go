@@ -34,7 +34,7 @@ func (c *GetCitasController) ShortPoll(ctx *gin.Context) {
 	// Obtener los productos (esto simula si hay cambios o no)
 	products, err := c.getCitas.Run()
 	if err != nil {
-		ctx.JSON(http.StatusInternalserverError, gin.H{"error": err.Error()})
+		//ctx.JSON(http.StatusInternalserverError, gin.H{"error": err.Error()})
 		return
 	}
 

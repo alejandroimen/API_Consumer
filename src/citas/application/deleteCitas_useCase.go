@@ -6,10 +6,10 @@ import (
 )
 
 type DeleteCitas struct {
-	repo repository.citasRepository
+	repo repository.CitasRepository
 }
 
-func NewDeleteCitas(repo repository.citasRepository) *DeleteCitas {
+func NewDeleteCitas(repo repository.CitasRepository) *DeleteCitas {
 	return &DeleteCitas{repo: repo}
 }
 

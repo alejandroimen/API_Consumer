@@ -9,15 +9,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type UpdatecitasController struct {
-	updatecitas *application.Updatecitas
+type UpdateCitasController struct {
+	updateCitas *application.UpdateCitas
 }
 
-func NewUpdatecitasController(updatecitas *application.Updatecitas) *UpdatecitasController {
-	return &UpdatecitasController{updatecitas: updatecitas}
+func NewUpdateCitasController(updateCitas *application.UpdateCitas) *UpdateCitasController {
+	return &UpdateCitasController{updateCitas: updateCitas}
 }
 
-func (update *UpdatecitasController) Handle(ctx *gin.Context) {
+func (update *UpdateCitasController) Handle(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
 		ctx.JSON(400, gin.H{"error": "ID de user inválido"})
@@ -34,7 +34,7 @@ func (update *UpdatecitasController) Handle(ctx *gin.Context) {
 		return
 	}
 
-	if err := update.updatecitas.Run(id, request.Email, request.Name, request.Password); err != nil {
+	if err := update.updateCitas.Run(id, request.Email, request.Name, request.Password); err != nil {
 		ctx.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
@@ -42,12 +42,12 @@ func (update *UpdatecitasController) Handle(ctx *gin.Context) {
 }
 
 // Controlador para Short Polling
-func (update *UpdatecitasController) ShortPoll(ctx *gin.Context) {
+func (update *UpdateCitasController) ShortPoll(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"message": "No hay datos nuevos"})
 }
 
 // Controlador para Long Polling
-func (update *UpdatecitasController) LongPoll(ctx *gin.Context) {
+func (update *UpdateCitasController) LongPoll(ctx *gin.Context) {
 	timeout := time.After(30 * time.Second)
 	select {
 	case <-timeout:
