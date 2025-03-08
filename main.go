@@ -4,14 +4,10 @@ import (
 	"log"
 
 	"github.com/alejandroimen/API_Consumer/src/core"
-	productApp "github.com/alejandroimen/API_Consumer/src/products/application"
-	productController "github.com/alejandroimen/API_Consumer/src/products/infrastructure/controllers"
-	productRepo "github.com/alejandroimen/API_Consumer/src/products/infrastructure/repository"
-	productRoutes "github.com/alejandroimen/API_Consumer/src/products/infrastructure/routes"
-	ucitasApp "github.com/alejandroimen/API_Consumer/src/ucitas/application"
-	ucitasController "github.com/alejandroimen/API_Consumer/src/ucitas/infrastructure/controllers"
-	ucitasRepo "github.com/alejandroimen/API_Consumer/src/ucitas/infrastructure/repository"
-	ucitasRoutes "github.com/alejandroimen/API_Consumer/src/ucitas/infrastructure/routes"
+	citasApp "github.com/alejandroimen/API_Consumer/src/citas/application"
+	citasController "github.com/alejandroimen/API_Consumer/src/citas/infrastructure/controllers"
+	citasRepo "github.com/alejandroimen/API_Consumer/src/citas/infrastructure/repository"
+	citasRoutes "github.com/alejandroimen/API_Consumer/src/citas/infrastructure/routes"
 	"github.com/gin-gonic/gin"
 )
 
@@ -25,7 +21,7 @@ func main() {
 
 	// Repositorios
 	productRepository := productRepo.NewProductRepoMySQL(db)
-	ucitasRepository := ucitasRepo.NewCreateucitasRepoMySQL(db)
+	citasRepository := citasRepo.NewCreatecitasRepoMySQL(db)
 
 	// Casos de uso para productos
 	createProduct := productApp.NewCreateProduct(productRepository)
@@ -33,11 +29,11 @@ func main() {
 	updateProduct := productApp.NewUpdateProduct(productRepository)
 	deleteProduct := productApp.NewDeleteProduct(productRepository)
 
-	// Casos de uso para ucitas
-	createucitas := ucitasApp.NewCreateucitas(ucitasRepository)
-	getucitass := ucitasApp.NewGetucitass(ucitasRepository)
-	deleteucitass := ucitasApp.NewDeleteucitas(ucitasRepository)
-	updateucitass := ucitasApp.NewUpdateucitas(ucitasRepository)
+	// Casos de uso para citas
+	createcitas := citasApp.NewCreatecitas(citasRepository)
+	getcitass := citasApp.NewGetcitass(citasRepository)
+	deletecitass := citasApp.NewDeletecitas(citasRepository)
+	updatecitass := citasApp.NewUpdatecitas(citasRepository)
 
 	// Controladores para productos
 	createProductController := productController.NewCreateProductController(createProduct)
@@ -45,11 +41,11 @@ func main() {
 	updateProductController := productController.NewUpdateProductController(updateProduct)
 	deleteProductController := productController.NewDeleteProductController(deleteProduct)
 
-	// Controladores para ucitas
-	createucitasController := ucitasController.NewCreateucitasController(createucitas)
-	getucitasController := ucitasController.NewucitassController(getucitass)
-	deleteucitasController := ucitasController.NewDeleteucitasController(deleteucitass)
-	updateucitasController := ucitasController.NewUpdateucitasController(updateucitass)
+	// Controladores para citas
+	createcitasController := citasController.NewCreatecitasController(createcitas)
+	getcitasController := citasController.NewcitassController(getcitass)
+	deletecitasController := citasController.NewDeletecitasController(deletecitass)
+	updatecitasController := citasController.NewUpdatecitasController(updatecitass)
 
 	// Configuración del enrutador de Gin
 	r := gin.Default()
@@ -57,8 +53,8 @@ func main() {
 	// Configurar rutas de productos
 	productRoutes.SetupProductRoutes(r, createProductController, getProductsController, updateProductController, deleteProductController)
 
-	// Configurar rutas de ucitas
-	ucitasRoutes.SetupucitasRoutes(r, createucitasController, getucitasController, deleteucitasController, updateucitasController)
+	// Configurar rutas de citas
+	citasRoutes.SetupcitasRoutes(r, createcitasController, getcitasController, deletecitasController, updatecitasController)
 
 	// Iniciar servidor
 	log.Println("server started at :8080")

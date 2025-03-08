@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"github.com/alejandroimen/API_Consumer/src/ucitas/infrastructure/controllers"
+	"github.com/alejandroimen/API_Consumer/src/citas/infrastructure/controllers"
 	"github.com/gin-gonic/gin"
 )
 

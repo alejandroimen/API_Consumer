@@ -5,26 +5,26 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/alejandroimen/API_Consumer/src/ucitas/application"
+	"github.com/alejandroimen/API_Consumer/src/citas/application"
 	"github.com/gin-gonic/gin"
 )
 
-type DeleteucitasController struct {
-	deleteucitas *application.Deleteucitas
+type DeletecitasController struct {
+	deletecitas *application.Deletecitas
 }
 
-func NewDeleteucitasController(deleteucitas *application.Deleteucitas) *DeleteucitasController {
-	return &DeleteucitasController{deleteucitas: deleteucitas}
+func NewDeletecitasController(deletecitas *application.Deletecitas) *DeletecitasController {
+	return &DeletecitasController{deletecitas: deletecitas}
 }
 
-func (du *DeleteucitasController) Handle(ctx *gin.Context) {
+func (du *DeletecitasController) Handle(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
 		ctx.JSON(400, gin.H{"error": "ID de user inválido"})
 		return
 	}
 
-	if err := du.deleteucitas.Run(id); err != nil {
+	if err := du.deletecitas.Run(id); err != nil {
 		ctx.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
@@ -33,12 +33,12 @@ func (du *DeleteucitasController) Handle(ctx *gin.Context) {
 }
 
 // Controlador para Short Polling
-func (du *DeleteucitasController) ShortPoll(ctx *gin.Context) {
+func (du *DeletecitasController) ShortPoll(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"message": "No hay datos nuevos"})
 }
 
 // Controlador para Long Polling
-func (du *DeleteucitasController) LongPoll(ctx *gin.Context) {
+func (du *DeletecitasController) LongPoll(ctx *gin.Context) {
 	timeout := time.After(30 * time.Second)
 	select {
 	case <-timeout:

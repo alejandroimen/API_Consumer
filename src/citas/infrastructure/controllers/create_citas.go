@@ -5,19 +5,19 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/alejandroimen/API_Consumer/src/ucitas/application"
+	"github.com/alejandroimen/API_Consumer/src/citas/application"
 	"github.com/gin-gonic/gin"
 )
 
-type CreateucitasController struct {
-	Createucitass *application.Createucitass
+type CreateCitasController struct {
+	CreateCitas *application.CreateCitas
 }
 
-func NewCreateucitasController(Createucitass *application.Createucitass) *CreateucitasController {
-	return &CreateucitasController{Createucitass: Createucitass}
+func NewCreateCitasController(CreateCitas *application.CreateCitas) *CreateCitasController {
+	return &CreateCitasController{CreateCitas: CreateCitas}
 }
 
-func (c *CreateucitasController) Handle(ctx *gin.Context) {
+func (c *CreateCitasController) Handle(ctx *gin.Context) {
 	log.Println("Petición de crear un user, recibido")
 
 	var request struct {
@@ -33,7 +33,7 @@ func (c *CreateucitasController) Handle(ctx *gin.Context) {
 	}
 	log.Printf("Creando user: Name=%s, email=%s", request.Name, request.Email)
 
-	if err := c.Createucitass.Run(request.Email, request.Name, request.Password); err != nil {
+	if err := c.CreateCitas.Run(request.Email, request.Name, request.Password); err != nil {
 		log.Printf("Error creando el user: %v", err)
 		ctx.JSON(500, gin.H{"error": err.Error()})
 		return
@@ -44,12 +44,12 @@ func (c *CreateucitasController) Handle(ctx *gin.Context) {
 }
 
 // Controlador para Short Polling
-func (c *CreateucitasController) ShortPoll(ctx *gin.Context) {
+func (c *CreateCitasController) ShortPoll(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"message": "No hay datos nuevos"})
 }
 
 // Controlador para Long Polling
-func (c *CreateucitasController) LongPoll(ctx *gin.Context) {
+func (c *CreateCitasController) LongPoll(ctx *gin.Context) {
 	timeout := time.After(30 * time.Second)
 	select {
 	case <-timeout:

@@ -5,34 +5,34 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/alejandroimen/API_Consumer/src/ucitas/application"
+	"github.com/alejandroimen/API_Consumer/src/citas/application"
 	"github.com/gin-gonic/gin"
 )
 
-type GetucitassController struct {
-	getucitass *application.Getucitass
+type GetCitasController struct {
+	getCitas *application.GetCitas
 }
 
-func NewucitassController(getucitass *application.Getucitass) *GetucitassController {
-	return &GetucitassController{getucitass: getucitass}
+func NewcitassController(getCitas *application.GetCitas) *GetCitasController {
+	return &GetCitasController{getCitas: getCitas}
 }
 
-func (gu *GetucitassController) Handle(ctx *gin.Context) {
-	log.Println("Petición de listar todos los ucitas, recibido")
+func (gu *GetCitasController) Handle(ctx *gin.Context) {
+	log.Println("Petición de listar todos los citas, recibido")
 
-	ucitas, err := gu.getucitass.Run()
+	citas, err := gu.getCitas.Run()
 	if err != nil {
-		log.Printf("Error buscando ucitas")
+		log.Printf("Error buscando citas")
 		ctx.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
 
-	log.Printf("Retornando %d ucitas", len(ucitas))
-	ctx.JSON(200, ucitas)
+	log.Printf("Retornando %d citas", len(citas))
+	ctx.JSON(200, citas)
 }
-func (c *GetucitassController) ShortPoll(ctx *gin.Context) {
+func (c *GetCitasController) ShortPoll(ctx *gin.Context) {
 	// Obtener los productos (esto simula si hay cambios o no)
-	products, err := c.getucitass.Run()
+	products, err := c.getCitas.Run()
 	if err != nil {
 		ctx.JSON(http.StatusInternalserverError, gin.H{"error": err.Error()})
 		return
@@ -52,7 +52,7 @@ func (c *GetucitassController) ShortPoll(ctx *gin.Context) {
 }
 
 // Controlador para Long Polling
-func (gu *GetucitassController) LongPoll(ctx *gin.Context) {
+func (gu *GetCitasController) LongPoll(ctx *gin.Context) {
 	timeout := time.After(30 * time.Second)
 	select {
 	case <-timeout:
