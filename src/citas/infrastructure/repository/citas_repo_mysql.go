@@ -81,7 +81,7 @@ func (r *citasRepoMySQL) PublishOrderCreated(cita entities.Citas) error {
 
 	err = r.channel.Publish(
 		"",               // exchange
-		"Citas",  // queue name
+		"Citas",  		  // queue name
 		false,            // mandatory
 		false,            // immediate
 		amqp.Publishing{
