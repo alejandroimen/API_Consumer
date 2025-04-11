@@ -21,6 +21,7 @@ func (c *CreateCitasController) Handle(ctx *gin.Context) {
 	log.Println("Petición de crear un user, recibido")
 
 	var request struct {
+		Curp	 string `json:"curp"`
 		Name     string `json:"name"`
 		Email    string `json:"email"`
 		Password string `json:"password"`
