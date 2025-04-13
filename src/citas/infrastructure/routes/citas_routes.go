@@ -5,7 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetupucitasRoutes(r *gin.Engine, createCitasController *controllers.CreateCitasController, getcitasController *controllers.GetCitasController, deletecitasController *controllers.DeletecitasController, updateucitasController *controllers.UpdateCitasController) {
+func SetupucitasRoutes(r *gin.Engine, createCitasController *controllers.CreateCitasController, getcitasController *controllers.GetCitasController, deletecitasController *controllers.DeleteCitasController, updateucitasController *controllers.UpdateCitasController) {
 	// Rutas CRUD
 	r.POST("/citas", createCitasController.Handle)
 	r.GET("/citas", getcitasController.Handle)

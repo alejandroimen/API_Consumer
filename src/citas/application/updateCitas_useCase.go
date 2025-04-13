@@ -13,16 +13,16 @@ func NewUpdateCitas(repo repository.CitasRepository) *UpdateCitas {
 	return &UpdateCitas{repo: repo}
 }
 
-func (us *UpdateCitas) Run(id int, name string, email string, password string) error {
+func (us *UpdateCitas) Run(id int, idUser int, fecha string, estado string) error {
 	ucitas, err := us.repo.FindByID(id)
 	if err != nil {
 		return fmt.Errorf("user no encontrado: %w", err)
 	}
 
-	//actualizo los campos del user:
-	ucitas.Name = name
-	ucitas.Email = email
-	ucitas.Password = password
+	//actualizo la cita
+	ucitas.IdUser = idUser
+	ucitas.Fecha = fecha
+	ucitas.Estado = estado
 
 	//guardo los cambios en el repositorio:
 	if err := us.repo.Update(*ucitas); err != nil {

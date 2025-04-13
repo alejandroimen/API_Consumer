@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+	"log"
 
 	"github.com/alejandroimen/API_Consumer/src/citas/application"
 	"github.com/gin-gonic/gin"
@@ -25,16 +26,24 @@ func (update *UpdateCitasController) Handle(ctx *gin.Context) {
 	}
 
 	var request struct {
-		Name     string `json:"name"`
-		Email    string `json:"email"`
-		Password string `json:"password"`
+        IdUser string `json:"idUser"`
+        Fecha  string `json:"fecha"`
+        Estado string `json:"estado"`
 	}
 	if err := ctx.ShouldBindJSON(&request); err != nil {
 		ctx.JSON(400, gin.H{"error": "petición del body inválida"})
 		return
 	}
 
-	if err := update.updateCitas.Run(id, request.Email, request.Name, request.Password); err != nil {
+	// Convertir IdUser de string a int
+    idUser, err := strconv.Atoi(request.IdUser)
+    if err != nil {
+        log.Printf("Error al convertir idUser a entero: %v", err)
+        ctx.JSON(http.StatusBadRequest, gin.H{"error": "idUser debe ser un número válido"})
+        return
+    }
+
+	if err := update.updateCitas.Run(id, idUser, request.Fecha, request.Estado); err != nil {
 		ctx.JSON(500, gin.H{"error": err.Error()})
 		return
 	}

@@ -13,7 +13,7 @@ type GetCitasController struct {
 	getCitas *application.GetCitas
 }
 
-func NewcitassController(getCitas *application.GetCitas) *GetCitasController {
+func NewGetCitasController(getCitas *application.GetCitas) *GetCitasController {
 	return &GetCitasController{getCitas: getCitas}
 }
 

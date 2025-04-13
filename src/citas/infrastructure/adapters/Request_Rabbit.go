@@ -1,149 +1,179 @@
 package adapters
 
 import (
-	"encoding/json"
-	"fmt"
-	"log"
-	"math/rand"
-	"os"
-	"time"
+    "encoding/json"
+    "fmt"
+    "log"
+    "math/rand"
+    "time"
 
-	"github.com/joho/godotenv"
-	amqp "github.com/rabbitmq/amqp091-go"
-	"github.com/JosephAntony37900/API-Hexagonal-1-Consumidor/notifications/domain/entities"
-	"github.com/JosephAntony37900/API-Hexagonal-1-Consumidor/notifications/domain/repository"
+    "github.com/alejandroimen/API_Consumer/src/citas/domain/entities"
+    "github.com/alejandroimen/API_Consumer/src/citas/domain/repository"
+    "github.com/alejandroimen/API_Consumer/src/citas/domain/services"
+    amqp "github.com/rabbitmq/amqp091-go"
 )
 
-var conn *amqp.Connection
-var channel *amqp.Channel
-type Order struct {
-	Id         int    `json:"id"`
-	Usuario_id int    `json:"usuario_id"`
-	Producto   string `json:"producto"`
-	Pais string `json:"pais"`
-	Entidad_federativa string `json:"entidad_federativa"`
-	Cp string `json:"cp"`
+type RabbitMQAdapter struct {
+    conn    *amqp.Connection
+    channel *amqp.Channel
 }
 
-func InitRabbitMQ() {
+func NewRabbitMQAdapter(connectionString string) (services.RabbitMQService, error) {
+    conn, err := amqp.Dial(connectionString)
+    if err != nil {
+        return nil, fmt.Errorf("error al conectar con RabbitMQ: %w", err)
+    }
 
-	err := godotenv.Load()
-	if err != nil {
-		log.Println("No se pudo cargar el archivo .env")
-	}
+    channel, err := conn.Channel()
+    if err != nil {
+        return nil, fmt.Errorf("error al abrir un canal en RabbitMQ: %w", err)
+    }
 
-	username := os.Getenv("Name")
-	password := os.Getenv("PasswordQueue")
-
-	rabbitURL := fmt.Sprintf("amqp://%s:%s@98.85.106.157:5672/", username, password)
-	conn, err = amqp.Dial(rabbitURL)
-	if err != nil {
-		log.Fatalf("Error al conectar con RabbitMQ: %s", err)
-	}
-
-	channel, err = conn.Channel()
-	if err != nil {
-		log.Fatalf("Error al abrir un canal en RabbitMQ: %s", err)
-	}
-
-	log.Println("Conectado a RabbitMQ exitosamente")
+    return &RabbitMQAdapter{conn: conn, channel: channel}, nil
 }
 
-func CloseRabbitMQ() {
-	if channel != nil {
-		channel.Close()
-	}
-	if conn != nil {
-		conn.Close()
-	}
+func (r *RabbitMQAdapter) PublishCita(cita entities.Citas, colaDestino string) error {
+    orderJSON, err := json.Marshal(cita)
+    if err != nil {
+        return fmt.Errorf("error al convertir la cita a JSON: %w", err)
+    }
+
+    err = r.channel.Publish(
+        "citas",       // exchange
+        colaDestino,   // routing key
+        false,
+        false,
+        amqp.Publishing{
+            ContentType: "application/json",
+            Body:        orderJSON,
+        },
+    )
+    if err != nil {
+        return fmt.Errorf("error al publicar el mensaje en RabbitMQ: %w", err)
+    }
+
+    return nil
 }
 
-func ConsumeCreatedOrders(repo repository.NotificationRepository) {
-	queue, err := channel.QueueDeclare(
-		"created.order",
-		true,            
-		false,           
-		false,           
-		false,           
-		nil,             
-	)
-	if err != nil {
-		log.Fatalf("Error al declarar la cola 'created.order': %s", err)
-	}
+func (r *RabbitMQAdapter) ConsumeCreatedUsers(repo repository.CitasRepository) {
+    go func() {
+        for {
+            log.Println("🔄 Iniciando consumidor de 'created.user'...")
 
-	msgs, err := channel.Consume(
-		queue.Name, 
-		"",         
-		true,       
-		false,      
-		false,      
-		false,      
-		nil,        
-	)
-	if err != nil {
-		log.Fatalf("Error al registrar el consumidor: %s", err)
-	}
+            // 1. Reintento de conexión si el canal está cerrado
+            if r.channel == nil || r.channel.IsClosed() {
+                log.Println("⚠️ Canal cerrado. Intentando reconectar...")
+                var err error
+                r.conn, err = amqp.Dial("amqp://rabbit:rabbit@35.170.173.77:5672/vh")
+                if err != nil {
+                    log.Printf("❌ Error al reconectar con RabbitMQ: %s", err)
+                    time.Sleep(5 * time.Second)
+                    continue
+                }
 
-	go func() {
-		for d := range msgs {
-			var order Order
-			if err := json.Unmarshal(d.Body, &order); err != nil {
-				log.Printf("Error al decodificar el mensaje: %s", err)
-				continue
-			}
+                r.channel, err = r.conn.Channel()
+                if err != nil {
+                    log.Printf("❌ Error al abrir nuevo canal: %s", err)
+                    time.Sleep(5 * time.Second)
+                    continue
+                }
+            }
 
-			// Decidir aleatoriamente si el pedido es aceptado o rechazado
-			rand.Seed(time.Now().UnixNano())
-			decision := rand.Intn(2) // 0: Rechazado, 1: Aceptado
+            // 2. Declarar cola y hacer binding
+            queue, err := r.channel.QueueDeclare(
+                "created.user", true, false, false, false, nil,
+            )
+            if err != nil {
+                log.Printf("❌ Error al declarar la cola: %s", err)
+                time.Sleep(5 * time.Second)
+                continue
+            }
 
-			var mensaje string
-			var colaDestino string
+            err = r.channel.QueueBind(
+                "created.user", "created.user", "citas", false, nil,
+            )
+            if err != nil {
+                log.Printf("❌ Error al hacer binding: %s", err)
+                time.Sleep(5 * time.Second)
+                continue
+            }
 
-			if decision == 1 {
-				mensaje = fmt.Sprintf("Pedido aceptado para el producto: %s", order.Producto)
-				colaDestino = "order.confirmed"
-			} else {
-				mensaje = fmt.Sprintf("Pedido rechazado para el producto: %s", order.Producto)
-				colaDestino = "order.rejected"
-			}
+            // 3. Crear canal para detectar cierre
+            closeChan := make(chan *amqp.Error)
+            r.channel.NotifyClose(closeChan)
 
-			notification := entities.Notification{
-				Usuario_id: order.Usuario_id,
-				Mensaje:    mensaje,
-			}
-			if err := repo.Save(notification); err != nil {
-				log.Printf("Error al guardar la notificación: %s", err)
-				continue
-			}
+            // 4. Consumir mensajes
+            msgs, err := r.channel.Consume(
+                queue.Name, "", true, false, false, false, nil,
+            )
+            if err != nil {
+                log.Printf("❌ Error al consumir mensajes: %s", err)
+                time.Sleep(5 * time.Second)
+                continue
+            }
 
-			if err := PublishOrderDecision(order, colaDestino); err != nil {
-				log.Printf("Error al publicar el mensaje en la cola %s: %s", colaDestino, err)
-			}
+            // 5. Procesar mensajes hasta que el canal se cierre
+            for {
+                select {
+                case d, ok := <-msgs:
+                    if !ok {
+                        log.Println("⚠️ Canal de mensajes cerrado.")
+                        time.Sleep(5 * time.Second)
+                        break
+                    }
 
-			log.Printf("Notificación creada para el usuario %d: %s", order.Usuario_id, mensaje)
-		}
-	}()
+                    var userId int
+                    if err := json.Unmarshal(d.Body, &userId); err != nil {
+                        log.Printf("❌ Error al decodificar el mensaje: %s", err)
+                        continue
+                    }
+
+                    rand.Seed(time.Now().UnixNano())
+                    estado := []string{"Pendiente", "Confirmada"}[rand.Intn(2)]
+
+                    cita := entities.Citas{
+                        IdUser: userId,
+                        Fecha:  time.Now().Format("2006-01-02"),
+                        Estado: estado,
+                    }
+
+                    if err := repo.Save(cita); err != nil {
+                        log.Printf("❌ Error al guardar la cita: %s", err)
+                        continue
+                    }
+
+                    var colaDestino string
+                    if estado == "Confirmada" {
+                        colaDestino = "citas.confirmadas"
+                    } else {
+                        colaDestino = "citas.pendientes"
+                    }
+
+                    if err := r.PublishCita(cita, colaDestino); err != nil {
+                        log.Printf("❌ Error al publicar la cita en '%s': %s", colaDestino, err)
+                    }
+
+                    log.Printf("✅ Cita creada para el usuario %d con estado %s", userId, estado)
+
+                case err := <-closeChan:
+                    log.Printf("❌ Canal cerrado con error: %v", err)
+                    time.Sleep(5 * time.Second)
+                    break
+                }
+            }
+
+            // Esperamos un momento antes de intentar reconectar
+            time.Sleep(3 * time.Second)
+        }
+    }()
 }
 
-func PublishOrderDecision(order Order, colaDestino string) error {
-	orderJSON, err := json.Marshal(order)
-	if err != nil {
-		return fmt.Errorf("error al convertir la orden a JSON: %w", err)
-	}
-
-	err = channel.Publish(
-		"",           
-		colaDestino,  
-		false,        
-		false,       
-		amqp.Publishing{
-			ContentType: "application/json",
-			Body:        orderJSON,
-		},
-	)
-	if err != nil {
-		return fmt.Errorf("error al publicar el mensaje en RabbitMQ: %w", err)
-	}
-
-	return nil
+func (r *RabbitMQAdapter) Close() error {
+    if r.channel != nil {
+        r.channel.Close()
+    }
+    if r.conn != nil {
+        r.conn.Close()
+    }
+    return nil
 }

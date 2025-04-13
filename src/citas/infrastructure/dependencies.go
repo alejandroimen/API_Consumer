@@ -1,27 +1,43 @@
-package infraestructure
+package infrastructure
 
 import (
-	"database/sql"
-	"github.com/gin-gonic/gin"
-	citasApp "github.com/alejandroimen/API_Consumer/src/citas/application"
-	citasController "github.com/alejandroimen/API_Consumer/src/citas/infraestructure/controllers"
-    citasRepo "github.com/alejandroimen/API_Consumer/src/citas/infraestructure/repository"
-    citasRoutes "github.com/alejandroimen/API_Consumer/src/citas/infraestructure/routes"
-	"github.com/alejandroimen/API_Consumer/src/citas/infraestructure/adapters"
+    "database/sql"
+    "log"
+
+    "github.com/alejandroimen/API_Consumer/src/citas/application"
+    "github.com/alejandroimen/API_Consumer/src/citas/infrastructure/adapters"
+    "github.com/alejandroimen/API_Consumer/src/citas/infrastructure/controllers"
+    "github.com/alejandroimen/API_Consumer/src/citas/infrastructure/repository"
+    "github.com/alejandroimen/API_Consumer/src/citas/infrastructure/routes"
+    "github.com/gin-gonic/gin"
 )
 
-func InitCitasDependencies(Engine *gin.Engine, db *sql.DB){
-	adapters.InitRabbitMQ()
+func InitCitasDependencies(Engine *gin.Engine, db *sql.DB) {
+    // Inicializar RabbitMQ
+    rabbitMQService, err := adapters.NewRabbitMQAdapter("amqp://rabbit:rabbit@35.170.173.77:5672/vh")
+    if err != nil {
+        log.Fatalf("Error inicializando RabbitMQ: %s", err)
+    }
 
-	citasRepository := citasRepo.NewNotificationRepositoryMySQL(db)
+    // Inicializar el repositorio de citas
+    citasRepository := repository.NewCitasRepository(db)
 
-	go adapters.ConsumeCreatedOrders(citasRepository)
-	createCita := citasApp.NewCreateNotification(citasRepository)
-	getByUserNoti := citasApp.NewGetNotificationsByUser(citasRepository)
+    // Configurar el consumo de mensajes de RabbitMQ
+    go rabbitMQService.ConsumeCreatedUsers(citasRepository)
 
-	createCitasController := citasController.NewCreateNotificationController(createCita)
-	getByUserCitasController := citasController.NewGetNotificationsByUserController(getByUserNoti)
+    // Inicializar los casos de uso
+    createCita := application.NewCreateCita(citasRepository, rabbitMQService)               // Caso de uso para crear citas
+    getCita := application.NewGetCitas(citasRepository)                   // Caso de uso para obtener citas
+    updateCita := application.NewUpdateCitas(citasRepository)             // Caso de uso para actualizar citas
+    deleteCita := application.NewDeleteCitas(citasRepository)             // Caso de uso para eliminar citas
 
-	citasRoutes.NotificationRoutes(Engine, createCitasController, getByUserCitasController)
+    // Inicializar los controladores
+    createCitasController := controllers.NewCreateCitasController(createCita)
+    getCitaController := controllers.NewGetCitasController(getCita)
+    updateCitaController := controllers.NewUpdateCitasController(updateCita)
+    deleteCitaController := controllers.NewDeleteCitasController(deleteCita)
+
+    // Configurar las rutas en Gin
+    routes.SetupucitasRoutes(Engine, createCitasController, getCitaController, deleteCitaController, updateCitaController)
 
 }

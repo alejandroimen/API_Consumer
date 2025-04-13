@@ -16,9 +16,9 @@ func NewGetCitas(repo repository.CitasRepository) *GetCitas {
 }
 
 func (gu *GetCitas) Run() ([]entities.Citas, error) {
-	ucitass, err := gu.repo.FindAll()
+	citas, err := gu.repo.FindAll()
 	if err != nil {
 		return nil, err
 	}
-	return ucitass, nil
+	return citas, nil
 }

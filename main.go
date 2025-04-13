@@ -4,10 +4,7 @@ import (
 	"log"
 
 	"github.com/alejandroimen/API_Consumer/src/core"
-	citasApp "github.com/alejandroimen/API_Consumer/src/citas/application"
-	citasController "github.com/alejandroimen/API_Consumer/src/citas/infrastructure/controllers"
-	citasRepo "github.com/alejandroimen/API_Consumer/src/citas/infrastructure/repository"
-	citasRoutes "github.com/alejandroimen/API_Consumer/src/citas/infrastructure/routes"
+	citasInfra "github.com/alejandroimen/API_Consumer/src/citas/infrastructure"
 	"github.com/gin-gonic/gin"
 )
 
@@ -19,26 +16,12 @@ func main() {
 	}
 	defer db.Close()
 
-	// Repositorios
-	citasRepository := citasRepo.NewCreatecitasRepoMySQL(db)
-
-	// Casos de uso para citas
-	createcitas := citasApp.NewCreateCitas(citasRepository)
-	getcitass := citasApp.NewGetcitas(citasRepository)
-	deletecitass := citasApp.NewDeletecitas(citasRepository)
-	updatecitass := citasApp.NewUpdatecitas(citasRepository)
-
-	// Controladores para citas
-	createcitasController := citasController.NewCreatecitasController(createcitas)
-	getcitasController := citasController.NewcitassController(getcitass)
-	deletecitasController := citasController.NewDeletecitasController(deletecitass)
-	updatecitasController := citasController.NewUpdatecitasController(updatecitass)
-
 	// Configuración del enrutador de Gin
 	r := gin.Default()
+	r.Use(core.SetupCORS())
 
-	// Configurar rutas de citas
-	citasRoutes.SetupcitasRoutes(r, createcitasController, getcitasController, deletecitasController, updatecitasController)
+	citasInfra.InitCitasDependencies(r, db)
+
 
 	// Iniciar servidor
 	log.Println("server started at :8080")
